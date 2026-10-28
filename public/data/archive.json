@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "publishedAt": "2026-10-28T06:00:07.759Z",
+  "collectedAt": "2026-10-28T07:41:10.889Z",
+  "days": [
+    {
+      "date": "2026-10-13",
+      "spend": null,
+      "complete": true,
+      "available": false,
+      "publishedAt": "2026-10-19T18:00:36.434Z",
+      "availableAt": "2026-10-19T12:00:35.988Z",
+      "source": "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261019T2222.json"
+    },
+    {
+      "date": "2026-10-14",
+      "spend": null,
+      "complete": true,
+      "available": false,
+      "publishedAt": "2026-10-20T18:00:08.960Z",
+      "availableAt": "2026-10-19T12:00:35.988Z",
+      "source": "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261020T2138.json"
+    },
+    {
+      "date": "2026-10-15",
+      "spend": "0.7682201999999996",
+      "complete": true,
+      "available": true,
+      "publishedAt": "2026-10-21T18:00:09.949Z",
+      "availableAt": "2026-10-19T12:00:35.988Z",
+      "source": "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261021T2144.json"
+    },
+    {
+      "date": "2026-10-16",
+      "spend": "0.8238163600000002",
+      "complete": true,
+      "available": true,
+      "publishedAt": "2026-10-22T18:00:10.728Z",
+      "availableAt": "2026-10-19T12:00:35.988Z",
+      "source": "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261022T2137.json"
+    },
+    {
+      "date": "2026-10-17",
+      "spend": "1.8324309000000008",
+      "complete": true,
+      "available": true,
+      "publishedAt": "2026-10-23T18:19:27.819Z",
+      "availableAt": "2026-10-19T12:00:35.988Z",
+      "source": "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261023T2126.json"
+    },
+    {
+      "date": "2026-10-18",
+      "spend": "2.9453845",
+      "complete": true,
+      "available": true,
+      "publishedAt": "2026-10-24T18:00:13.990Z",
+      "availableAt": "2026-10-19T12:00:35.988Z",
+      "source": "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261024T2051.json"
+    },
+    {
+      "date": "2026-10-19",
+      "spend": "0.22610058999999996",
+      "complete": true,
+      "available": true,
+      "publishedAt": "2026-10-25T18:00:10.416Z",
+      "availableAt": "2026-10-20T00:00:35.953Z",
+      "source": "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261025T2052.json"
+    },
+    {
+      "date": "2026-10-20",
+      "spend": "1.3671357999999998",
+      "complete": true,
+      "available": true,
+      "publishedAt": "2026-10-26T18:00:08.835Z",
+      "availableAt": "2026-10-21T00:00:09.331Z",
+      "source": "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261026T2241.json"
+    },
+    {
+      "date": "2026-10-21",
+      "spend": "3.270882450000001",
+      "complete": true,
+      "available": true,
+      "publishedAt": "2026-10-27T12:00:08.009Z",
+      "availableAt": "2026-10-22T00:00:08.164Z",
+      "source": "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261027T1214.json"
+    },
+    {
+      "date": "2026-10-22",
+      "complete": true,
+      "available": true,
+      "spend": "11.00722815",
+      "publishedAt": "2026-10-28T06:00:07.759Z",
+      "availableAt": "2026-10-23T00:00:09.453Z",
+      "source": "https://stats.aipipe.org/usage.json"
+    },
+    {
+      "date": "2026-10-23",
+      "complete": true,
+      "available": true,
+      "spend": "13.798813450000003",
+      "publishedAt": "2026-10-28T06:00:07.759Z",
+      "availableAt": "2026-10-24T00:00:09.192Z",
+      "source": "https://stats.aipipe.org/usage.json"
+    },
+    {
+      "date": "2026-10-24",
+      "complete": true,
+      "available": true,
+      "spend": "16.46138393",
+      "publishedAt": "2026-10-28T06:00:07.759Z",
+      "availableAt": "2026-10-25T00:00:07.905Z",
+      "source": "https://stats.aipipe.org/usage.json"
+    },
+    {
+      "date": "2026-10-25",
+      "complete": true,
+      "available": true,
+      "spend": "17.65492995",
+      "publishedAt": "2026-10-28T06:00:07.759Z",
+      "availableAt": "2026-10-26T00:00:12.852Z",
+      "source": "https://stats.aipipe.org/usage.json"
+    },
+    {
+      "date": "2026-10-26",
+      "complete": true,
+      "available": true,
+      "spend": "2.19763595",
+      "publishedAt": "2026-10-28T06:00:07.759Z",
+      "availableAt": "2026-10-27T00:01:18.422Z",
+      "source": "https://stats.aipipe.org/usage.json"
+    },
+    {
+      "date": "2026-10-27",
+      "complete": true,
+      "available": true,
+      "spend": "2.5484218000000007",
+      "publishedAt": "2026-10-28T06:00:07.759Z",
+      "availableAt": "2026-10-28T00:00:15.692Z",
+      "source": "https://stats.aipipe.org/usage.json"
+    },
+    {
+      "date": "2026-10-28",
+      "complete": false,
+      "available": true,
+      "spend": "0.37869215000000006",
+      "publishedAt": "2026-10-28T06:00:07.759Z",
+      "availableAt": "2026-10-28T06:00:07.759Z",
+      "source": "https://stats.aipipe.org/usage.json"
+    }
+  ],
+  "revisions": [],
+  "sources": [
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261019T1418.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261019T2222.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261020T0453.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261020T1140.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261020T1709.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261020T2138.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261021T0451.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261021T1151.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261021T1714.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261021T2144.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261022T0450.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261022T1155.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261022T1712.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261022T2137.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261023T0452.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261023T1141.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261023T1709.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261023T2126.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261024T0439.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261024T1103.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261024T1558.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261024T2051.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261025T0443.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261025T1132.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261025T1623.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261025T2052.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261026T0449.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261026T1306.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261026T2241.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261027T0507.json",
+    "https://github.com/sarangkrish27/aipipe-usage-tracker/blob/main/snapshots/usage_20261027T1214.json",
+    "https://stats.aipipe.org/usage.json"
+  ]
+}

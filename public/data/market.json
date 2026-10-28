@@ -1,0 +1,172 @@
+{
+  "id": "aipipe-weekly-cost-2026-11-02-v2",
+  "title": "How much will AI Pipe cost in one week?",
+  "outcomes": [
+    {
+      "id": "0-1c",
+      "label": "0¢ to under 1¢"
+    },
+    {
+      "id": "1-2c",
+      "label": "1¢ to under 2¢"
+    },
+    {
+      "id": "2-5c",
+      "label": "2¢ to under 5¢"
+    },
+    {
+      "id": "5-10c",
+      "label": "5¢ to under 10¢"
+    },
+    {
+      "id": "10-20c",
+      "label": "10¢ to under 20¢"
+    },
+    {
+      "id": "20-50c",
+      "label": "20¢ to under 50¢"
+    },
+    {
+      "id": "50-100c",
+      "label": "50¢ to under $1"
+    },
+    {
+      "id": "100-200c",
+      "label": "$1 to under $2"
+    },
+    {
+      "id": "200-500c",
+      "label": "$2 to under $5"
+    },
+    {
+      "id": "500-1000c",
+      "label": "$5 to under $10"
+    },
+    {
+      "id": "1000-2000c",
+      "label": "$10 to under $20"
+    },
+    {
+      "id": "2000-5000c",
+      "label": "$20 to under $50"
+    },
+    {
+      "id": "5000-10000c",
+      "label": "$50 to under $100"
+    },
+    {
+      "id": "10000-20000c",
+      "label": "$100 to under $200"
+    },
+    {
+      "id": "20000-50000c",
+      "label": "$200 to under $500"
+    },
+    {
+      "id": "50000-100000c",
+      "label": "$500 to under $1,000"
+    },
+    {
+      "id": "100000-plus-c",
+      "label": "$1,000 or more"
+    }
+  ],
+  "trading": {
+    "opensAt": "2026-10-17T00:00:00Z",
+    "closesAt": "2026-11-09T00:00:00Z"
+  },
+  "observation": {
+    "window": {
+      "startDate": "2026-11-02",
+      "endDate": "2026-11-09"
+    }
+  },
+  "settlement": {
+    "numericRanges": [
+      {
+        "outcomeId": "0-1c",
+        "min": 0,
+        "max": 0.01
+      },
+      {
+        "outcomeId": "1-2c",
+        "min": 0.01,
+        "max": 0.02
+      },
+      {
+        "outcomeId": "2-5c",
+        "min": 0.02,
+        "max": 0.05
+      },
+      {
+        "outcomeId": "5-10c",
+        "min": 0.05,
+        "max": 0.1
+      },
+      {
+        "outcomeId": "10-20c",
+        "min": 0.1,
+        "max": 0.2
+      },
+      {
+        "outcomeId": "20-50c",
+        "min": 0.2,
+        "max": 0.5
+      },
+      {
+        "outcomeId": "50-100c",
+        "min": 0.5,
+        "max": 1
+      },
+      {
+        "outcomeId": "100-200c",
+        "min": 1,
+        "max": 2
+      },
+      {
+        "outcomeId": "200-500c",
+        "min": 2,
+        "max": 5
+      },
+      {
+        "outcomeId": "500-1000c",
+        "min": 5,
+        "max": 10
+      },
+      {
+        "outcomeId": "1000-2000c",
+        "min": 10,
+        "max": 20
+      },
+      {
+        "outcomeId": "2000-5000c",
+        "min": 20,
+        "max": 50
+      },
+      {
+        "outcomeId": "5000-10000c",
+        "min": 50,
+        "max": 100
+      },
+      {
+        "outcomeId": "10000-20000c",
+        "min": 100,
+        "max": 200
+      },
+      {
+        "outcomeId": "20000-50000c",
+        "min": 200,
+        "max": 500
+      },
+      {
+        "outcomeId": "50000-100000c",
+        "min": 500,
+        "max": 1000
+      },
+      {
+        "outcomeId": "100000-plus-c",
+        "min": 1000
+      }
+    ]
+  }
+}

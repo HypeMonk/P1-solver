@@ -1,0 +1,45 @@
+name: Collect public evidence and verify
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'public/data/**'
+      - '*.md'
+      - 'share/**'
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+permissions:
+  contents: write
+concurrency:
+  group: public-forecast-archive
+  cancel-in-progress: false
+jobs:
+  verify-and-collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+          cache: npm
+      - run: npm ci
+      - name: Collect public reports only
+        if: github.event_name != 'push'
+        run: npm run collect
+      - run: npm test
+      - name: Verify the Cloudflare static build
+        run: npm run build:cloudflare
+      - name: Retain changed public reports
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "forecast-archive-bot"
+          git config user.email "forecast-archive-bot@users.noreply.github.com"
+          git add public/data/archive.json public/data/market.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh public forecast evidence" -m "Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+            git push origin HEAD:main
+          fi
