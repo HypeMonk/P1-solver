@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "publishedAt": "2026-10-30T12:00:08.439Z",
-  "collectedAt": "2026-10-30T12:58:19.833Z",
+  "publishedAt": "2026-10-30T18:00:09.186Z",
+  "collectedAt": "2026-10-30T18:38:27.081Z",
   "days": [
     {
       "date": "2026-10-13",
@@ -107,7 +107,7 @@
       "complete": true,
       "available": true,
       "spend": "16.46138393",
-      "publishedAt": "2026-10-30T12:00:08.439Z",
+      "publishedAt": "2026-10-30T18:00:09.186Z",
       "availableAt": "2026-10-25T00:00:07.905Z",
       "source": "https://stats.aipipe.org/usage.json"
     },
@@ -116,7 +116,7 @@
       "complete": true,
       "available": true,
       "spend": "17.65492995",
-      "publishedAt": "2026-10-30T12:00:08.439Z",
+      "publishedAt": "2026-10-30T18:00:09.186Z",
       "availableAt": "2026-10-26T00:00:12.852Z",
       "source": "https://stats.aipipe.org/usage.json"
     },
@@ -125,7 +125,7 @@
       "complete": true,
       "available": true,
       "spend": "2.19763595",
-      "publishedAt": "2026-10-30T12:00:08.439Z",
+      "publishedAt": "2026-10-30T18:00:09.186Z",
       "availableAt": "2026-10-27T00:01:18.422Z",
       "source": "https://stats.aipipe.org/usage.json"
     },
@@ -134,7 +134,7 @@
       "complete": true,
       "available": true,
       "spend": "2.5484218000000007",
-      "publishedAt": "2026-10-30T12:00:08.439Z",
+      "publishedAt": "2026-10-30T18:00:09.186Z",
       "availableAt": "2026-10-28T00:00:15.692Z",
       "source": "https://stats.aipipe.org/usage.json"
     },
@@ -143,7 +143,7 @@
       "complete": true,
       "available": true,
       "spend": "3.6028603500000003",
-      "publishedAt": "2026-10-30T12:00:08.439Z",
+      "publishedAt": "2026-10-30T18:00:09.186Z",
       "availableAt": "2026-10-29T00:00:18.680Z",
       "source": "https://stats.aipipe.org/usage.json"
     },
@@ -152,7 +152,7 @@
       "complete": true,
       "available": true,
       "spend": "9.002830099999999",
-      "publishedAt": "2026-10-30T12:00:08.439Z",
+      "publishedAt": "2026-10-30T18:00:09.186Z",
       "availableAt": "2026-10-30T00:00:07.997Z",
       "source": "https://stats.aipipe.org/usage.json"
     },
@@ -160,9 +160,9 @@
       "date": "2026-10-30",
       "complete": false,
       "available": true,
-      "spend": "1.3985821499999997",
-      "publishedAt": "2026-10-30T12:00:08.439Z",
-      "availableAt": "2026-10-30T12:00:08.439Z",
+      "spend": "2.1617237199999995",
+      "publishedAt": "2026-10-30T18:00:09.186Z",
+      "availableAt": "2026-10-30T18:00:09.186Z",
       "source": "https://stats.aipipe.org/usage.json"
     }
   ],
