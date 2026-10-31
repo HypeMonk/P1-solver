@@ -45,18 +45,18 @@ export function sharedResearchData(state:GameState|null,market:Market,studentId:
 }
 export const METHOD_SPEC={
   arithmetic:'Preserve decimal totals from JSON; sum with decimal.js at 120-digit precision; classify half-open numeric ranges before display rounding.',
-  training:'All completed, available retained days strictly earlier than today in UTC; at least three days. Incomplete/missing days are unknown.',
+  training:'Completed, available retained days strictly earlier than today in UTC whose retained value was available by the evaluation time; at least three days. Incomplete/missing days are unknown.',
   models:[
     {name:'Recent week',rule:'Mean of the most recent seven available completed observations (not zero-filled calendar days).'},
     {name:'Recent three days',rule:'Mean of the most recent three available completed observations.'},
     {name:'Smoothed level',rule:'Starting at the first observation, level = 0.4 * next observation + 0.6 * previous level.'},
     {name:'Weekday pattern',rule:'0.5 * mean of last four matching weekday observations + 0.5 * recent-seven mean. Missing weekday falls back to recent-seven mean.'},
   ],
-  backtest:'Rolling seven-day target windows with current lead-time gap. Past training values must have been available by the historical noon-UTC origin; skip noncontiguous targets. Fewer than three folds per method: equal weights. Otherwise normalize 1/max(weekly MAE,1). Overlapping folds are not independent; later revisions are conservatively excluded from training.',
-  simulations:{count:6000,seed:'FNV-1a fingerprint of date:spending for all usable archive rows, sorted; LCG multiplier 1664525, increment 1013904223.',
-    method:'Sample one model by its blend weight; apply a shared exp((U-0.5)*0.6) level shock; add circular three-day blocks of residuals from last 14 usable observations, centered on their mean; floor each estimated day at zero.',
-    total:'Known completed target-day subtotal plus simulated costs of all unknown target dates.',recommendation:'Range with largest simulated share; interval: 5th to 95th sample percentiles; point: sample median.',
-    warning:'These scenario shares are not calibrated probabilities. Regime changes and calendar effects may invalidate the assumptions.'},
+  backtest:'Shift the current unknown-date mask and evaluation cutoff backward by whole weeks, preserving weekdays, gaps and remaining-day count. Use up to twelve recent non-overlapping target windows. Exclude training values unavailable at each historical cutoff and mask target dates out of training; skip missing target observations or mismatched latest training dates. Fewer than three matching weeks per method: equal weights. Otherwise normalize 1/max(remaining-total MAE,1). Revised training values are conservatively excluded until available. This archive is not a complete point-in-time database.',
+  simulations:{count:6000,seed:'FNV-1a fingerprint of date:spending for usable training rows available by the evaluation cutoff, sorted; LCG multiplier 1664525, increment 1013904223.',
+    method:'With at least three matching past weeks, sample a model and one of its signed remaining-total forecast errors; add the error to its current remaining-total prediction under a shared exp((U-0.5)*0.6) stress multiplier and floor the remainder at zero. With less history, retain provisional circular three-day blocks of raw spending deviations and the same stress multiplier; these are explicitly heuristic, not measured forecast errors.',
+    total:'Add the exact known completed target subtotal to the simulated unknown remainder with decimal arithmetic before range classification. Displayed method totals and daily estimates use their mean signed historical errors when matching history is sufficient; the overall point remains a simulation median, not a sum of rounded daily displays.',recommendation:'Range with largest simulated share; interval: 5th to 95th sample percentiles; point: sample median.',
+    warning:'Even historical-error scenarios are not calibrated probabilities. The fixed stress multiplier is an assumption, not an estimated confidence limit; unexpected regime changes and calendar effects can lie outside it.'},
 };
 interface PacketInput{archive:Archive;market:Market;game:GameState|null;gameFetchedAt:string|null;studentId:string;rulesLive:boolean;liveFeedChecked?:boolean;notices:string[];imported:boolean;now?:number;secrets?:string[]}
 export async function buildResearchPacket(input:PacketInput){
@@ -64,7 +64,7 @@ export async function buildResearchPacket(input:PacketInput){
   const f=forecast(input.archive,input.market,now);
   const game=sharedResearchData(input.game,input.market,input.studentId,secrets);
   const sourceHash=async(text:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))).map(b=>b.toString(16).padStart(2,'0')).join('');
-  const archive={...input.archive,days:input.archive.days.map(d=>({...d,usedForTraining:usable(d)&&d.date<new Date(now).toISOString().slice(0,10)}))};
+  const archive={...input.archive,days:input.archive.days.map(d=>({...d,usedForTraining:usable(d)&&d.date<new Date(now).toISOString().slice(0,10)&&Date.parse(d.availableAt??d.publishedAt)<=now}))};
   const packet={
     format:'forecast-notebook-research-v1',exportedAt:new Date(now).toISOString(),
     freshness:{reportPublishedAt:input.archive.publishedAt,archiveCollectedAt:input.archive.collectedAt,reportAgeHours:(now-Date.parse(input.archive.publishedAt))/3600_000,

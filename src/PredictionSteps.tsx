@@ -10,7 +10,7 @@ interface Props {
 export function PredictionSteps(p:Props){
   const {result,market}=p;
   const label=outcomeLabel(p.outcome||result.recommendation||'',market);
-  const ordinaryWarnings=result.warnings.filter(w=>!w.startsWith('History is short')&&!w.startsWith('Too few horizon-matched'));
+  const ordinaryWarnings=result.warnings.filter(w=>!w.startsWith('History is short')&&!w.startsWith('Too few matching past weeks'));
   return <div className="prediction-steps">
     {!p.rulesVerified&&<p className="notice">Live game rules are not verified, or an analysis file was imported. Saving through this app is disabled. Reload or check the official game before using this draft.</p>}
     {!p.liveFeedChecked&&<p className="notice danger">The live spending source could not be checked. This suggestion uses the saved report shown above. Try Refresh prediction; do not mistake it for newly fetched evidence.</p>}
@@ -51,11 +51,12 @@ export function PredictionSteps(p:Props){
     <p className="simple-note"><strong>After saving:</strong> come back when new reports arrive. Revise only when the new evidence changes your view. After settlement, submit your personal result code in the assignment.</p>
     <section className="export-section"><h3>Prefer to ask your own AI?</h3><p>Download one file with the latest available reports, forecast logic, calculation source, prompts, and shared game predictions when connected. Upload it to your own LLM and ask it to review the forecast.</p><button className="secondary" onClick={p.onResearch} disabled={p.exportBusy}>{p.exportBusy?'Refreshing and preparing…':'Download everything for my own AI'}</button><p className="fine">No API key is needed. The file records refresh failures and missing class data. No private history, account IDs, or credentials are exported. Download again for a newer snapshot.</p></section>
     <details className="technical-details"><summary>How was this estimated? (Optional details)</summary>
-      <p>We compare four calculation methods. {result.scenarios.every(s=>s.folds>=3)&&result.scenarios.length?'Methods that performed better on past weekly tests have more influence.':'There is too little past data to prove which method is most reliable, so the methods are treated equally. This is not an error.'}</p>
-      {result.warnings.filter(w=>w.startsWith('History is short')||w.startsWith('Too few horizon-matched')).map((w,i)=><p className="fine" key={i}>{w}</p>)}
+      <p>We compare four calculation methods. {result.validation.uncertainty==='historical-errors'?'We check past weeks with the same days still unknown, then use the methods’ actual mistakes to explore uncertainty.':'There are too few matching past weeks to judge the methods reliably, so they have equal influence and the uncertainty range remains provisional.'}</p>
+      {result.warnings.filter(w=>w.startsWith('History is short')||w.startsWith('Too few matching past weeks')).map((w,i)=><p className="fine" key={i}>{w}</p>)}
+      <p className="fine">{result.validation.matchedWeeks} separate matching past weeks · {result.validation.remainingDays} target {result.validation.remainingDays===1?'day':'days'} still unknown. Historical errors and stress assumptions do not prove what next week will cost.</p>
       <p><strong>Observed target-week cost:</strong> {formatMoney(result.knownTotal,4)} from {result.completed} completed days. Unreported days are not counted as zero.</p>
       {result.low!==null&&result.high!==null&&<p><strong>Most simulated totals:</strong> {formatMoney(result.low)}–{formatMoney(result.high)}. This is not a proven probability range.</p>}
-      <div className="table-wrap"><table><thead><tr><th>Method</th><th>Estimated week</th><th>Past weekly tests</th></tr></thead><tbody>{result.scenarios.map(s=><tr key={s.method}><th>{s.method}</th><td>{formatMoney(s.total)}</td><td>{s.folds?`${s.folds} tests`:'Not enough history'}</td></tr>)}</tbody></table></div>
+      <div className="table-wrap"><table><thead><tr><th>Method</th><th>Estimated week</th><th>Matching past weeks</th></tr></thead><tbody>{result.scenarios.map(s=><tr key={s.method}><th>{s.method}</th><td>{formatMoney(s.total)}</td><td>{s.folds?`${s.folds} tests`:'Not enough history'}</td></tr>)}</tbody></table></div>
       {p.notices.map((n,i)=><p className="fine" key={i}>{n}</p>)}
       <button className="text-button" onClick={p.onEvidence}>Open advanced data</button>
     </details>

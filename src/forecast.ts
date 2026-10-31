@@ -26,32 +26,68 @@ export interface Forecast {
   missing: string[]; point: number | null; low: number | null; high: number | null;
   recommendation: string | null; stale: boolean; closed: boolean;
   warnings: string[]; reason: string;
-  scenarios: { method: Method; total: number; outcome: string; weight: number; weeklyMae: number | null; folds: number }[];
+  validation: { matchedWeeks: number; remainingDays: number; uncertainty: 'historical-errors' | 'stress-scenarios' | 'observed' };
+  scenarios: { method: Method; total: number; outcome: string; weight: number; remainingMae: number | null; folds: number }[];
   rangeShares: { id: string; share: number }[];
   daily: { date: string; observed: string | null; estimated: number | null }[];
 }
 
-export function weeklyBacktest(rows: SpendDay[], lead: number) {
-  return METHODS.map(method => {
-    const errors: number[] = [];
-    for (let i = 7; i + lead + 7 <= rows.length; i++) {
-      const origin = Date.parse(rows[i].date) + 12*3600_000;
-      const past = rows.slice(0,i).filter(r => Date.parse(r.availableAt ?? r.publishedAt) <= origin);
-      if (past.length < 7) continue;
-      const test = rows.slice(i + lead, i + lead + 7);
-      if (Date.parse(test[0].date) - Date.parse(past.at(-1)!.date) !== (lead+1)*DAY || test.some((r,j) => r.date !== dateKey(Date.parse(test[0].date)+j*DAY))) continue;
-      const predicted = test.reduce((sum,r) => sum+predictDay(past,r.date,method),0);
-      errors.push(Math.abs(predicted - Number(sumMoney(test.map(r => r.spend!)))));
+export interface BacktestScore {
+  method: Method; folds: number; mae: number | null;
+  errors: { origin: string; dates: string[]; predicted: number; actual: number; error: number; dailyErrors: number[] }[];
+}
+const availableBy = (row: SpendDay, time: number) => usable(row) && row.date < dateKey(time) && Date.parse(row.availableAt ?? row.publishedAt) <= time;
+
+export function remainingBacktest(rows: SpendDay[], missing: string[], now: number): BacktestScore[] {
+  const history = rows.filter(row => availableBy(row,now)).sort((a,b) => a.date.localeCompare(b.date));
+  const scores: BacktestScore[] = METHODS.map(method => ({ method, folds: 0, mae: null, errors: [] }));
+  if (!history.length || !missing.length) return scores;
+  const byDate = new Map(history.map(row => [row.date,row]));
+  const latest = Date.parse(history.at(-1)!.date);
+  const earliest = Date.parse(history[0].date);
+  // Weekly shifts preserve weekdays and the missing-day mask without overlapping targets.
+  for (let shift = 7*DAY; latest-shift >= earliest+6*DAY && scores[0].folds < 12; shift += 7*DAY) {
+    const origin = now-shift;
+    const dates = missing.map(date => dateKey(Date.parse(date)-shift));
+    const targetSet = new Set(dates);
+    const test = dates.map(date => byDate.get(date));
+    if (test.some(row => !row)) continue;
+    const lastTrainingDate = dateKey(latest-shift);
+    const past = history.filter(row => row.date <= lastTrainingDate && !targetSet.has(row.date) && availableBy(row,origin));
+    if (past.length < 7 || past.at(-1)!.date !== lastTrainingDate) continue;
+    const actual = Number(sumMoney(test.map(row => row!.spend!)));
+    for (const score of scores) {
+      const daily = dates.map(date => predictDay(past,date,score.method));
+      const predicted = daily.reduce((sum,value) => sum+value,0);
+      score.errors.push({ origin: new Date(origin).toISOString(), dates, predicted, actual, error: actual-predicted,
+        dailyErrors: test.map((row,i) => Number(row!.spend)-daily[i]) });
     }
-    return { method, folds: errors.length, mae: errors.length ? mean(errors) : null };
-  });
+    scores.forEach(score => score.folds++);
+  }
+  return scores.map(score => ({ ...score, mae: score.folds ? mean(score.errors.map(fold => Math.abs(fold.error))) : null }));
+}
+
+export function weeklyBacktest(rows: SpendDay[], lead: number) {
+  const last = [...rows].sort((a,b) => a.date.localeCompare(b.date)).at(-1);
+  if (!last) return METHODS.map(method => ({ method, folds: 0, mae: null }));
+  const latest = Date.parse(last.date);
+  const dates = Array.from({length:7},(_,i) => dateKey(latest+(lead+i+1)*DAY));
+  return remainingBacktest(rows,dates,latest+DAY+12*3600_000).map(({method,folds,mae}) => ({method,folds,mae}));
+}
+
+function forecastIdentity(training: SpendDay[], missing: string[], knownTotal: string, scores: BacktestScore[], market: Market) {
+  const text = JSON.stringify({ version: 'remaining-days-v1', market, training: training.map(row => [row.date,row.spend,row.availableAt ?? row.publishedAt]), missing, knownTotal,
+    errors: scores.map(score => [score.method,score.errors.map(fold => [fold.dates,fold.error])]) });
+  let hash = 2166136261;
+  for (const c of text) hash = Math.imul(hash ^ c.charCodeAt(0),16777619);
+  return (hash >>> 0).toString(16);
 }
 
 export function forecast(archive: Archive, market: Market, now = Date.now()): Forecast {
   const dates = targetDates(market);
   const byDate = new Map(archive.days.map(d => [d.date,d]));
-  const training = archive.days.filter(d => usable(d) && d.date < dateKey(now)).sort((a,b) => a.date.localeCompare(b.date));
-  const known = dates.map(d => byDate.get(d)).filter((d): d is SpendDay => !!d && usable(d) && d.date < dateKey(now));
+  const training = archive.days.filter(d => availableBy(d,now)).sort((a,b) => a.date.localeCompare(b.date));
+  const known = dates.map(d => byDate.get(d)).filter((d): d is SpendDay => !!d && availableBy(d,now));
   const knownMap = new Map(known.map(d => [d.date,d.spend!]));
   const missing = dates.filter(d => !knownMap.has(d));
   const knownTotal = sumMoney([...knownMap.values()]);
@@ -63,9 +99,10 @@ export function forecast(archive: Archive, market: Market, now = Date.now()): Fo
   if (archive.revisions.length) warnings.push(`${archive.revisions.length} completed-day revision(s) recorded. Latest report values take precedence.`);
   const elapsedMissing = missing.filter(d => d < dateKey(now));
   if (elapsedMissing.length) warnings.push(`Completed target-day reports are missing for ${elapsedMissing.join(', ')}. These days are estimated, never counted as zero.`);
-  const base: Forecast = { status: 'insufficient', publishedAt: archive.publishedAt, evidenceId: fingerprint(archive), trainingDays: training.length,
+  const base: Forecast = { status: 'insufficient', publishedAt: archive.publishedAt, evidenceId: forecastIdentity(training,missing,knownTotal,[],market), trainingDays: training.length,
     knownTotal, completed: known.length, targetDays: dates.length, missing, point: null, low: null, high: null, recommendation: null,
-    stale, closed, warnings, reason: '', scenarios: [], rangeShares: [], daily: dates.map(date => ({ date, observed: knownMap.get(date) ?? null, estimated: null })) };
+    stale, closed, warnings, reason: '', scenarios: [], rangeShares: [], validation: { matchedWeeks: 0, remainingDays: missing.length, uncertainty: missing.length ? 'stress-scenarios' : 'observed' },
+    daily: dates.map(date => ({ date, observed: knownMap.get(date) ?? null, estimated: null })) };
   if (!missing.length) {
     const recommendation = bucketFor(knownTotal, market);
     return { ...base, status: 'observed', point: Number(knownTotal), low: Number(knownTotal), high: Number(knownTotal), recommendation,
@@ -79,17 +116,22 @@ export function forecast(archive: Archive, market: Market, now = Date.now()): Fo
   if (training.length < 21) warnings.push('History is short and usage can change sharply. Scenario shares are not calibrated probabilities or guarantees.');
   const gaps = training.slice(1).filter((d,i) => Date.parse(d.date)-Date.parse(training[i].date) !== DAY);
   if (gaps.length) warnings.push('Historical dates have gaps. Backtests only use contiguous target weeks.');
-  const lead = Math.max(0, Math.round((Date.parse(missing[0])-Date.parse(training.at(-1)!.date))/DAY)-1);
-  const scores = weeklyBacktest(training, lead);
+  const scores = remainingBacktest(training,missing,now);
   const enoughBacktests = scores.every(s => s.folds >= 3);
-  if (!enoughBacktests) warnings.push('Too few horizon-matched weekly backtests to select a proven model. The four models receive equal weight.');
+  if (!enoughBacktests) warnings.push('Too few matching past weeks to rank the methods or estimate their errors reliably. The four models receive equal weight; uncertainty uses provisional stress scenarios.');
   const inverse = scores.map(s => enoughBacktests ? 1/Math.max(s.mae!,1) : 1);
   const weightSum = inverse.reduce((a,b) => a+b,0);
+  const estimates = METHODS.map(method => missing.map(date => predictDay(training,date,method)));
+  const remainingTotals = estimates.map(days => days.reduce((sum,value) => sum+value,0));
+  const adjustedEstimates = estimates.map((days,i) => days.map((value,j) => Math.max(0,value+(enoughBacktests ? mean(scores[i].errors.map(fold => fold.dailyErrors[j])) : 0))));
   const scenarios = METHODS.map((method,i) => {
-    const total = Number(knownTotal)+missing.reduce((sum,date) => sum+predictDay(training,date,method),0);
-    return { method, total, outcome: bucketFor(total,market), weight: inverse[i]/weightSum, weeklyMae: scores[i].mae, folds:scores[i].folds };
+    const correction = enoughBacktests ? mean(scores[i].errors.map(fold => fold.error)) : 0;
+    const total = sumMoney([knownTotal,String(Math.max(0,remainingTotals[i]+correction))]);
+    return { method, total: Number(total), outcome: bucketFor(total,market), weight: inverse[i]/weightSum, remainingMae: scores[i].mae, folds:scores[i].folds };
   });
-  let seed = parseInt(fingerprint(archive),16) || 1;
+  base.evidenceId = forecastIdentity(training,missing,knownTotal,scores,market);
+  base.validation = { matchedWeeks: scores[0].folds, remainingDays: missing.length, uncertainty: enoughBacktests ? 'historical-errors' : 'stress-scenarios' };
+  let seed = parseInt(fingerprint({...archive,days:training}),16) || 1;
   const random = () => { seed = (Math.imul(seed,1664525)+1013904223) >>> 0; return seed/4294967296; };
   const recent = values(training.slice(-14));
   const center = mean(recent);
@@ -99,25 +141,32 @@ export function forecast(archive: Archive, market: Market, now = Date.now()): Fo
   for (let i = 0; i < 6000; i++) {
     const choice = random(); let cumulative=0;
     const model = scenarios.find(s => { cumulative+=s.weight; return choice<cumulative; }) ?? scenarios.at(-1)!;
-    let offset = Math.floor(random()*residuals.length);
-    // Blocks retain some adjacent-day dependence; the shared shock exposes level uncertainty.
+    const modelIndex = scenarios.indexOf(model);
+    const errors = scores[modelIndex].errors;
+    let offset = Math.floor(random()*(enoughBacktests ? errors.length : residuals.length));
     const shock = Math.exp((random()-.5)*.6);
-    let total = Number(knownTotal);
-    for (let j=0;j<missing.length;j++) {
-      if (j%3 === 0) offset=Math.floor(random()*residuals.length);
-      total += Math.max(0,predictDay(training,missing[j],model.method)*shock+residuals[(offset+j%3)%residuals.length]);
+    let remaining = 0;
+    if (enoughBacktests) {
+      remaining = Math.max(0,remainingTotals[modelIndex]*shock+errors[offset].error);
+    } else {
+      // With little matching history, retain the broad, explicitly heuristic stress scenarios.
+      for (let j=0;j<missing.length;j++) {
+        if (j%3 === 0) offset=Math.floor(random()*residuals.length);
+        remaining += Math.max(0,estimates[modelIndex][j]*shock+residuals[(offset+j%3)%residuals.length]);
+      }
     }
-    samples.push(total);
+    const total = sumMoney([knownTotal,String(remaining)]);
+    samples.push(Number(total));
     const bucket = bucketFor(total,market); shares.set(bucket,shares.get(bucket)!+1);
   }
   samples.sort((a,b) => a-b);
   const rangeShares = market.outcomes.map(o => ({ id:o.id,share:shares.get(o.id)!/samples.length }));
   const recommendation = [...rangeShares].sort((a,b) => b.share-a.share)[0].id;
   const point = median(samples);
-  const daily = base.daily.map(d => ({ ...d, estimated:d.observed === null ? scenarios.reduce((sum,s) => sum+s.weight*predictDay(training,d.date,s.method),0) : null }));
+  const daily = base.daily.map(d => ({ ...d, estimated:d.observed === null ? scenarios.reduce((sum,s,i) => sum+s.weight*adjustedEstimates[i][missing.indexOf(d.date)],0) : null }));
   const reportTime = archive.publishedAt.slice(0,16).replace('T',' ')+' UTC';
   const basis = known.length
-    ? `${known.length} completed target days have cost $${knownTotal}. I have estimated the remaining ${missing.length} days rather than treating them as zero.`
+    ? `${known.length} completed target ${known.length===1?'day has':'days have'} cost $${knownTotal}. I have estimated the remaining ${missing.length} ${missing.length===1?'day':'days'} rather than treating them as zero.`
     : `The latest ${Math.min(training.length,7)} completed days averaged ${formatMoney(mean(values(training.slice(-7))))} per day. The target week has not been observed yet.`;
   const reason = `I predict ${outcomeLabel(recommendation,market)} for AI Pipe's total spending on 2–8 November (UTC). ${basis} Using the report from ${reportTime}, the estimated weekly total is about ${formatMoney(point)}. Future usage may change, so I will reconsider this range when new completed daily reports arrive.`;
   return { ...base, status:'forecast', point, low:quantile(samples,.05), high:quantile(samples,.95), recommendation, scenarios,rangeShares,daily,reason };
