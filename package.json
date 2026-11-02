@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsx scripts/build-guide.ts && tsc --noEmit && vite build",
+    "build": "tsx scripts/build-guide.ts && tsx scripts/build-project-guide.ts && tsc --noEmit && vite build",
     "build:cloudflare": "node scripts/build-cloudflare.mjs",
     "start": "tsx server/index.ts",
     "test": "vitest run",

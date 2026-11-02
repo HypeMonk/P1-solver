@@ -4,22 +4,25 @@ import { forecast, type Forecast } from './forecast';
 import { loadData, MarketClient } from './network';
 import { type LlmSettings, type ReviewPair, reviewForecast, settingsFor } from './llm';
 import { Guide } from './Guide';
+import { ProjectGuides } from './ProjectGuides';
+import { ProjectHome } from './ProjectHome';
+import { Q1_TABS,Q1_TAB_IDS,projectRoute,type Q1Tab } from './projectRouting';
 import { PredictionSteps } from './PredictionSteps';
 import { ReviewPanel } from './ReviewPanel';
 import { type GameState } from './gameHistory';
 import { GameHistoryPanel } from './GameHistoryPanel';
 import { buildResearchPacket } from './researchPacket';
 
-const tabs=['Forecast','Evidence','AI review','My account','Simple guide'] as const;
-type Tab=typeof tabs[number];
+const tabs=Q1_TABS;
+type Tab=Q1Tab;
 const tabLabels:Record<Tab,string>={Forecast:'My prediction',Evidence:'Advanced data','AI review':'Improve reason','My account':'Save to game','Simple guide':'How to play'};
 const primaryTabs:Tab[]=['Forecast','AI review','My account','Simple guide'];
-const tabIds=['forecast','evidence','ai-review','my-account','simple-guide'];
-const initialTab=()=>tabs[Math.max(0,tabIds.indexOf(location.hash.slice(1)))];
+const tabIds=Q1_TAB_IDS;
 const message=(e:unknown)=>e instanceof Error?e.message:'Something went wrong. Try again.';
 
 export default function App(){
-  const [tab,setTab]=useState<Tab>(initialTab);
+  const [route,setRoute]=useState(()=>projectRoute(location.hash));
+  const tab:Tab=route.kind==='q1'?route.tab:'Forecast';
   const [archive,setArchive]=useState<Archive|null>(null);
   const [market,setMarket]=useState<Market|null>(null);
   const [result,setResult]=useState<Forecast|null>(null);
@@ -56,7 +59,7 @@ export default function App(){
   const [review,setReview]=useState<ReviewPair|null>(null);
   const reviewAbort=useRef<AbortController|null>(null);
 
-  function navigate(next:Tab){setTab(next);location.hash=tabIds[tabs.indexOf(next)];setConfirmation(false);}
+  function navigate(next:Tab){setRoute({kind:'q1',tab:next});location.hash=tabIds[tabs.indexOf(next)];setConfirmation(false);window.scrollTo(0,0);}
   function draft(f:Forecast){ if(f.recommendation){draftMode.current='solver';setOutcome(f.recommendation);setReason(f.reason);setDraftEvidence(f.evidenceId);draftRef.current=f.evidenceId;setConfirmation(false);} }
   function editOutcome(value:string){draftMode.current='edited';setOutcome(value);setConfirmation(false);}
   function editReason(value:string){draftMode.current='edited';setReason(value);setConfirmation(false);}
@@ -75,14 +78,15 @@ export default function App(){
     }catch(e){setError(message(e));setStatus('Could not refresh. Any visible results retain their original report timestamp.');setConfigLive(false);setLiveFeedChecked(false);}
     finally{loading.current=false;setBusy(false);}
   }
-  useEffect(()=>{void refresh();const change=()=>setTab(initialTab());window.addEventListener('hashchange',change);return()=>{window.removeEventListener('hashchange',change);reviewAbort.current?.abort();};},[]);
+  useEffect(()=>{const change=()=>{setRoute(projectRoute(location.hash));setConfirmation(false);window.scrollTo(0,0);};window.addEventListener('hashchange',change);return()=>{window.removeEventListener('hashchange',change);reviewAbort.current?.abort();};},[]);
+  useEffect(()=>{if(route.kind==='q1'&&!archiveRef.current)void refresh();},[route.kind]);
   useEffect(()=>{
-    if(!watch)return;
+    if(!watch||route.kind!=='q1')return;
     const id=setInterval(()=>{if(document.visibilityState==='visible')void refresh();},10*60_000);
     const visible=()=>{if(document.visibilityState==='visible')void refresh();};
     document.addEventListener('visibilitychange',visible);
     return()=>{clearInterval(id);document.removeEventListener('visibilitychange',visible);};
-  },[watch]);
+  },[watch,route.kind]);
   useEffect(()=>{const id=setInterval(()=>{if(archiveRef.current&&market)setResult(forecast(archiveRef.current,market));},60_000);return()=>clearInterval(id);},[market]);
   function changeSettings(patch:Partial<LlmSettings>){setSettings(s=>({...s,...patch}));setConsent(false);}
   async function copy(text:string){try{await navigator.clipboard.writeText(text);setStatus('Copied.');}catch{setError('Clipboard access was blocked. Select and copy the text manually.');}}
@@ -165,8 +169,10 @@ export default function App(){
     finally{setExportBusy(false);}
   }
   return <>
-    <header className="header"><div className="shell header-inner"><a className="brand" href="#forecast" onClick={()=>navigate('Forecast')}><span className="brand-mark" aria-hidden="true">fn</span><span>Forecast Notebook<small>Q1 · November 2026</small></span></a><label className="theme">Appearance<select id="theme" value={theme} onChange={e=>{setTheme(e.target.value);if(e.target.value==='system')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=e.target.value;}}><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label></div></header>
+    <header className="header"><div className="shell header-inner"><a className="brand" href="#home"><span className="brand-mark" aria-hidden="true">p1</span><span>P1 Notebook<small>Questions, guides and Q1 solver</small></span></a><label className="theme">Appearance<select id="theme" value={theme} onChange={e=>{setTheme(e.target.value);if(e.target.value==='system')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=e.target.value;}}><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label></div></header>
     <main className="shell">
+      {route.kind==='home'?<ProjectHome/>:route.kind==='guide'?<ProjectGuides key={route.questionId} questionId={route.questionId}/>:<>
+      <a className="back-home" href="#home">← All P1 questions</a>
       <div className="intro simple-intro"><div><p className="eyebrow">Q1 · Predict AI Pipe’s bill for 2–8 November</p><h1>Your prediction, step by step.</h1><p>Get a range. Copy a reason. Save it in the game with zero credits.</p></div><button className="secondary" onClick={()=>navigate('Simple guide')}>What is this game?</button></div>
       <nav className="tabs" aria-label="Workspace sections">{primaryTabs.map(t=><button key={t} aria-current={tab===t?'page':undefined} onClick={()=>navigate(t)}>{tabLabels[t]}</button>)}</nav>
       <div className="status-line" role="status" aria-live="polite">{busy?<span className="dot pulse"/>:<span className="dot"/>}<span>{status}</span></div>
@@ -179,7 +185,8 @@ export default function App(){
         {history!==null&&student&&<GameHistoryPanel state={history} studentId={student} market={market} busy={accountBusy||exportBusy} onRefresh={()=>void refreshHistory()}/>}
         <section className="section"><h3>After the game: your result code</h3><p>After official settlement, retrieve your personal signed result code. Paste it into the assignment’s Q1 answer box, then press Check and Save.</p><button className="secondary" onClick={()=>void getReceipt()} disabled={!student||accountBusy}>Retrieve official result code</button>{receipt&&<><label htmlFor="receipt">Your signed result code</label><textarea id="receipt" readOnly value={receipt}/><button onClick={()=>void copy(receipt)}>Copy result code</button></>}</section></section>}
       </>}
-      <footer><p>Forecast Notebook · Independent student tool, not an official course service.</p><p>The game decides your marks. This tool helps you prepare and save a prediction.</p><div className="actions"><a href={ASSIGNMENT_URL} target="_blank" rel="noreferrer">Official assignment</a><button className="text-button" onClick={()=>navigate('Simple guide')}>Guide and help</button><button className="text-button" onClick={()=>navigate('Evidence')}>Advanced data</button></div><details><summary>Update settings</summary><label className="check"><input id="watch" type="checkbox" checked={watch} onChange={e=>setWatch(e.target.checked)}/>Check for new reports every 10 minutes while this page is visible</label><p className="fine">No account submissions happen automatically.</p></details></footer>
+      </>}
+      <footer><p>P1 Notebook · Independent student tool, not an official course service.</p><p>Use the guide for your question. The official assignment and games decide your results.</p><div className="actions"><a href="#home">All P1 questions</a><a href={ASSIGNMENT_URL} target="_blank" rel="noreferrer">Official assignment</a>{route.kind==='q1'&&<><button className="text-button" onClick={()=>navigate('Simple guide')}>Guide and help</button><button className="text-button" onClick={()=>navigate('Evidence')}>Advanced data</button></>}</div>{route.kind==='q1'&&<details><summary>Update settings</summary><label className="check"><input id="watch" type="checkbox" checked={watch} onChange={e=>setWatch(e.target.checked)}/>Check for new reports every 10 minutes while this page is visible</label><p className="fine">No account submissions happen automatically.</p></details>}</footer>
     </main>
   </>;
 }

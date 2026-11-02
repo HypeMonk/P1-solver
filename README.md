@@ -128,6 +128,19 @@ The guide now opens with **what the game is**, then gives **manual play** before
 - Text renders as React text, never raw LLM HTML. No generic server proxy or arbitrary server-side fetch URL is exposed.
 - Closing/reloading the page clears secrets and stops browser work. The public archive collector is separate from account actions.
 
+## Other Project 1 questions
+
+The default homepage lists all seven questions with short descriptions and separate phase deadlines. Click Q1 to open the existing forecast solver and guide; click Q2–Q7 to open that question’s separate guide. Each view has its own bookmarkable hash, with a link back to the homepage. The Q1 numerical solver, token flows and account actions are unchanged. Guides and the homepage do not require forecast data to load. The guides were checked against the public assignment source on **2 November 2026** and distinguish activity cutoffs from the exam Save deadline.
+
+- **Q2:** a free, local six-field offer script and 60-second rehearsal timer. Example promises are labeled; students replace them, practise and record their own natural voice in the official recorder. No microphone, uploads, provider calls or account tokens are used by the helper.
+- **Q3:** device/permission/submission checklist only. The Air Ink task explicitly requires personal completion without agents; its November 1 upload window is not reopened by the guide.
+- **Q4:** invoice reconciliation explanation and existing-result instructions, not an account-connected replacement for the closed document-request game.
+- **Q5:** ten-expression capture and consent checklist. The later classifier's requirements and deadline remain unknown; no photographs are collected by this app.
+- **Q6:** genuine trade, identity confirmation and final-receipt guide. The source's “midnight IST” wording is retained as ambiguous, not converted to an invented exact deadline. Check order state and precise closure in the official game.
+- **Q7:** separate creator, reader and final-receipt steps. Earlier activity deadlines are labeled closed as time passes; missing activities cannot be recreated by a later exam Save.
+
+Open `/project-guide.html` for the static question homepage; it links to six separate `/qN-guide.html` pages and the live Q1 solver. Their content comes from the same rules as the interactive views, and build generation does not fetch personal accounts or publish anything. The interactive homepage and guides use device time to label explicit published windows; those labels are not a live server-status check. Static pages list published dates without cached open/closed labels. Bonus and zero-mark questions are identified separately.
+
 ## Tests
 
 ```sh

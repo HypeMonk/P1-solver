@@ -18,7 +18,7 @@ test('the real app predicts the remaining Sunday using matching historical error
   const errors:string[]=[],posts:string[]=[];
   page.on('pageerror',error=>errors.push(error.message));
   page.on('request',request=>{if(request.method()==='POST')posts.push(request.url());});
-  await page.goto('/');
+  await page.goto('/#forecast');
   await expect(page.locator('.range')).toHaveText('$50 to under $100');
   await expect(page.locator('#home-reason')).toHaveValue(/6 completed target days.*remaining 1 day/);
   await page.getByText('How was this estimated? (Optional details)',{exact:true}).click();

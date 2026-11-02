@@ -18,7 +18,7 @@ test('research download refreshes public data, includes shared peer fields, and 
     return r.fulfill({json:{config:fixtureMarket,settled:false,probabilities:fixtureMarket.outcomes.map(o=>o.id==='10000-20000c'?1:0)}});
   });
   page.on('request',r=>{if(r.method()==='POST')posts++;});
-  await page.goto('/');await expect(page.getByRole('button',{name:'Copy reason',exact:true})).toBeEnabled();
+  await page.goto('/#forecast');await expect(page.getByRole('button',{name:'Copy reason',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'Save to game',exact:true}).click();await page.locator('#launch-token').fill('game-entry-secret');await page.getByRole('button',{name:'Connect account',exact:true}).click();await expect(page.locator('.identity')).toHaveText('owner@example.test');
   await page.getByRole('button',{name:'Improve reason',exact:true}).click();await page.locator('#api-key').fill('aipipe-api-secret');
   await page.getByRole('button',{name:'My prediction',exact:true}).click();newer=true;
@@ -37,7 +37,7 @@ test('a failed export refresh produces a labeled snapshot, not invented fresh ev
   await page.route('**/data/market.json',r=>r.fulfill({json:fixtureMarket}));
   await page.route('**/api/data*',r=>r.fulfill({json:{archive:fixtureArchive}}));
   await page.route('https://tds-network-games.sanand.workers.dev/prediction-market/api/markets',r=>r.fulfill({json:{markets:[fixtureMarket]}}));
-  await page.goto('/');await expect(page.getByRole('button',{name:'Copy reason',exact:true})).toBeEnabled();fail=true;
+  await page.goto('/#forecast');await expect(page.getByRole('button',{name:'Copy reason',exact:true})).toBeEnabled();fail=true;
   const waiting=page.waitForEvent('download');await page.getByRole('button',{name:'Download everything for my own AI',exact:true}).click();const file=await waiting;
   const text=await readFile((await file.path())!,'utf8');expect(text).toContain('Public-data refresh failed');expect(text).toContain('Not connected');expect(text).toContain('"liveMarketRulesChecked": false');
 });

@@ -20,7 +20,7 @@ test('the bundled Anthropic SDK streams two mocked reviews without exposing cour
     ];
     await route.fulfill({contentType:'text/event-stream',body:events.map(e=>`event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`).join('')});
   });
-  await page.goto('/');await page.getByRole('button',{name:'Improve reason',exact:true}).click();
+  await page.goto('/#forecast');await page.getByRole('button',{name:'Improve reason',exact:true}).click();
   await page.locator('#provider').selectOption('anthropic');
   await page.locator('#api-key').fill('mock-key-not-a-credential');await page.locator('#llm-consent').check();
   await page.getByRole('button',{name:'Review prediction and improve reason',exact:true}).click();

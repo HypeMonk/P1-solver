@@ -11,7 +11,7 @@ for(const edited of [false,true])test(`automatic refresh ${edited?'preserves an 
   await page.route('**/api/data*',r=>r.fulfill({json:{archive:changed?newer:fixtureArchive}}));
   await page.route('https://tds-network-games.sanand.workers.dev/prediction-market/api/markets',r=>r.fulfill({json:{markets:[fixtureMarket]}}));
   page.on('request',r=>{if(r.method()==='POST')posts++;});
-  await page.goto('/');await expect(page.getByRole('button',{name:'Copy reason',exact:true})).toBeEnabled();
+  await page.goto('/#forecast');await expect(page.getByRole('button',{name:'Copy reason',exact:true})).toBeEnabled();
   const firstRange=await page.locator('.range').innerText();
   const firstReason=await page.locator('#home-reason').inputValue();
   const custom='My own explanation should stay unchanged until I decide to replace it.';

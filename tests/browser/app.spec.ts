@@ -20,7 +20,7 @@ test.beforeEach(async({page})=>{
 });
 test('the home screen leads through three clear steps and hides technical detail',async({page})=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await expect(page.getByRole('button',{name:'Copy reason',exact:true})).toBeEnabled();
+  await page.goto('/#forecast');await expect(page.getByRole('button',{name:'Copy reason',exact:true})).toBeEnabled();
   await expect(page.getByRole('heading',{name:'Get your range',exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Read and copy your reason',exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Save it in the game',exact:true})).toBeVisible();
@@ -45,7 +45,7 @@ test('the home screen leads through three clear steps and hides technical detail
 });
 test('optional direct save requires confirmation and never exposes tokens to the relay',async({page})=>{
   const posts:{url:string;body:string}[]=[];page.on('request',r=>{if(r.method()==='POST')posts.push({url:r.url(),body:r.postData()??''});});
-  await page.goto('/');await page.getByRole('button',{name:'Save to game',exact:true}).click();
+  await page.goto('/#forecast');await page.getByRole('button',{name:'Save to game',exact:true}).click();
   await page.locator('#launch-token').fill('entry-secret-test');await page.getByRole('button',{name:'Connect account',exact:true}).click();
   await expect(page.locator('.identity')).toHaveText('student@example.test');
   await expect(page.locator('.saved-history')).toContainText('My earlier saved reason.');
@@ -71,7 +71,7 @@ test('compatible-provider review remains available and applies an editable home 
     calls.push(route.request().postDataJSON());
     await route.fulfill({json:{choices:[{finish_reason:'stop',message:{content:JSON.stringify(answer)}}],usage:{prompt_tokens:100,completion_tokens:50}}});
   });
-  await page.goto('/');await page.getByRole('button',{name:'Improve reason',exact:true}).click();
+  await page.goto('/#forecast');await page.getByRole('button',{name:'Improve reason',exact:true}).click();
   await page.locator('#provider').selectOption('compatible');await page.locator('#endpoint').fill('https://llm.example/v1');await page.locator('#model').fill('test-model');await page.locator('#api-key').fill('llm-secret-test');
   await expect(page.getByRole('button',{name:'Review prediction and improve reason',exact:true})).toBeDisabled();
   await page.locator('#llm-consent').check();await page.getByRole('button',{name:'Review prediction and improve reason',exact:true}).click();
@@ -91,7 +91,7 @@ test('AI Pipe checks its actual OpenAI route before paid inference',async({page}
     expect(route.request().url()).toContain('/openai/v1/chat/completions');calls.push(route.request().postDataJSON());
     return route.fulfill({json:{choices:[{finish_reason:'stop',message:{content:JSON.stringify(answer)}}],usage:{prompt_tokens:100,completion_tokens:50}}});
   });
-  await page.goto('/');await page.getByRole('button',{name:'Improve reason',exact:true}).click();
+  await page.goto('/#forecast');await page.getByRole('button',{name:'Improve reason',exact:true}).click();
   await expect(page.locator('#provider')).toHaveValue('aipipe');await expect(page.locator('#endpoint')).toHaveCount(0);
   await page.locator('#api-key').fill('aipipe-test-token');
   await page.getByRole('button',{name:'Check token and load models',exact:true}).click();
@@ -102,7 +102,7 @@ test('AI Pipe checks its actual OpenAI route before paid inference',async({page}
   await page.locator('#provider').selectOption('compatible');await expect(page.locator('#api-key')).toHaveValue('');await expect(page.locator('#llm-consent')).not.toBeChecked();
 });
 test('an imported archive cannot unlock account submission on refresh',async({page})=>{
-  await page.goto('/');await page.getByRole('button',{name:'Advanced data',exact:true}).click();
+  await page.goto('/#forecast');await page.getByRole('button',{name:'Advanced data',exact:true}).click();
   await page.getByText('Import a previously downloaded evidence file (advanced)',{exact:true}).click();
   await page.locator('#archive-import').setInputFiles({name:'forecast-evidence.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(archive))});
   await page.getByRole('button',{name:'My prediction',exact:true}).click();await page.getByRole('button',{name:'Refresh prediction',exact:true}).click();
